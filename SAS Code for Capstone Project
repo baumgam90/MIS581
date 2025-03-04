@@ -1,0 +1,101 @@
+## Figure 1 ##
+# Pie Chart showcasing the breakdown of characteristic variables in the combined dataset
+
+proc template;
+	define statgraph SASStudio.Pie;
+		begingraph;
+		layout region;
+		piechart category=CLASSIFICATION /;
+		endlayout;
+		endgraph;
+	end;
+run;
+ods graphics / reset width=6.4in height=4.8in imagemap;
+proc sgrender template=SASStudio.Pie data=MP_EPM2.CAPSTONE_COMBINED;
+run;
+ods graphics / reset;
+
+## Figure 2 ##
+# Box plot displaying averages and outlier estimate values by group
+
+ods graphics / reset width=6.4in height=4.8in imagemap;
+proc sgplot data=MP_EPM2.CAPSTONE_COMBINED;
+	vbox ESTIMATE / category=CLASSIFICATION group=GROUP;
+	yaxis grid;
+run;
+ods graphics / reset;
+
+## Figure 3 ##
+# Summary Statistics for Mental Health Dataset
+
+ods noproctitle;
+ods graphics / imagemap=on;
+proc sort data=MP_EPM2.CAPSTONE_MENTAL out=WORK.TempSorted2236;
+	by TOPIC;
+run;
+proc means data=WORK.TempSorted2236 chartype mean std min max n vardef=df;
+	var ESTIMATE;
+	class SUBGROUP;
+	by TOPIC;
+run;
+proc datasets library=WORK noprint;
+	delete TempSorted2236;
+	run;
+
+## Figure 4 ##
+# Table containing topics and values for the top 5 mean averages by subgroup and topic placed in an excel table
+
+# No code for Figure 4- excel table generated from evaluation of summary statistics
+
+## Figure 5 ##
+# Results of PROC UNIVARIATE 
+
+proc univariate data=MP_EPM2.capstone_combined;
+	class SUBGROUP;
+	var ESTIMATE;
+run;
+
+## Figure 6 ##
+# Series Plot for estimate averages among mental/behavioral health symptoms	
+
+ods graphics / reset width=6.4in height=4.8in imagemap;
+proc sort data=MP_EPM2.MEANS_MENTAL_TIME out=_SeriesPlotTaskData;
+	by TIME_PERIOD;
+run;
+proc sgplot data=_SeriesPlotTaskData;
+	series x=TIME_PERIOD y=ESTIMATE_Mean / group=TOPIC;
+	xaxis grid;
+	yaxis grid;
+run;
+ods graphics / reset;
+proc datasets library=WORK noprint;
+	delete _SeriesPlotTaskData;
+	run;
+
+## Figure 7 ##
+# Series Plot for estimate averages among physical health symptoms
+
+ods graphics / reset width=6.4in height=4.8in imagemap;
+proc sort data=MP_EPM2.MEANS_PHYSICAL_TIME out=_SeriesPlotTaskData;
+	by TIME_PERIOD;
+run;
+proc sgplot data=_SeriesPlotTaskData;
+	series x=TIME_PERIOD y=ESTIMATE_Mean / group=TOPIC;
+	xaxis grid;
+	yaxis grid;
+run;
+ods graphics / reset;
+proc datasets library=WORK noprint;
+	delete _SeriesPlotTaskData;
+	run;
+
+## Figure 8 ##
+# Histogram with normal distribution curve for subgroup = no working parents of combined physical and mental health average estimates
+
+proc univariate data=mp_epm2.capstone_combined;
+		class SUBGROUP;
+		var ESTIMATE;
+		HISTOGRAM ESTIMATE/Normal;
+run;
+
+
